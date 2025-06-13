@@ -17,10 +17,11 @@ public partial class MainPage : ContentPage
     private bool _satellite;
     private ILayer _roadLayer;
     private ILayer _satLayer;
-    private bool _tracking;
     private CancellationTokenSource? _cts;
     private readonly List<MPoint> _trackPoints = new();
     private MemoryLayer? _trackLayer;
+    private bool _tracking = false;
+    private bool _paused = false;
 
     public MainPage()
     {
@@ -41,6 +42,7 @@ public partial class MainPage : ContentPage
 
         // Starte automatische Zentrierung/Zoom auf aktuellen Standort
         _ = CenterMapOnStartAsync();
+        UpdateButtonStates();
     }
 
     public class CustomUrlBuilder : IUrlBuilder
@@ -110,30 +112,36 @@ public partial class MainPage : ContentPage
     }
     private void OnTrackClicked(object sender, EventArgs e)
     {
-        if (!_tracking)
-        {
-            _tracking = true;
-            TrackBtn.Text = "■ Stop Tracking";
-
-            _trackPoints.Clear();
-            _cts = new CancellationTokenSource();
-
-            _ = TrackLoopAsync(_cts.Token);
-            return;
-        }
-
-        // 2) Stoppen
-        _tracking = false;
-        TrackBtn.Text = "▶ Start Tracking";
-        _cts?.Cancel();
-        _cts = null;
+        _tracking = true;
+        _paused = false;
+        UpdateButtonStates();
+        // Tracking-Start-Logik...
+    }
+    private void OnPauseClicked(object sender, EventArgs e)
+    {
+        _paused = true;
+        UpdateButtonStates();
+        // Tracking pausieren...
+    }
+    private void OnResumeClicked(object sender, EventArgs e)
+    {
+        _paused = false;
+        UpdateButtonStates();
+        // Tracking fortsetzen...
     }
     private void OnStopTrackClicked(object sender, EventArgs e)
     {
         _tracking = false;
-        TrackBtn.IsEnabled = true;
-        StopTrackBtn.IsVisible = false;
-        // ... Tracking stoppen
+        _paused = false;
+        UpdateButtonStates();
+        // Tracking stoppen...
+    }
+    private void UpdateButtonStates()
+    {
+        TrackBtn.IsVisible = !_tracking;
+        PauseBtn.IsVisible = _tracking && !_paused;
+        ResumeBtn.IsVisible = _tracking && _paused;
+        StopTrackBtn.IsVisible = _tracking;
     }
 
     private async Task TrackLoopAsync(CancellationToken token)

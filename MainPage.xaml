@@ -96,6 +96,7 @@
         </Grid>
         <!-- Unterer Bereich -->
         <HorizontalStackLayout Grid.Row="2" HorizontalOptions="Center" Spacing="20" Padding="0,20">
+            <!-- Start -->
             <Button x:Name="TrackBtn"
             Text="▶ Start Tracking"
             Clicked="OnTrackClicked"
@@ -103,7 +104,29 @@
             BackgroundColor="#94e2d5"
             TextColor="#181825"
             FontAttributes="Bold"
-            CornerRadius="22"/>
+            CornerRadius="22"
+            IsVisible="{Binding NotTracking}"/>
+            <!-- Pause -->
+            <Button x:Name="PauseBtn"
+            Text="⏸ Pause"
+            Clicked="OnPauseClicked"
+            WidthRequest="110"
+            BackgroundColor="#fab387"
+            TextColor="#181825"
+            FontAttributes="Bold"
+            CornerRadius="22"
+            IsVisible="{Binding TrackingAndNotPaused}"/>
+            <!-- Fortsetzen -->
+            <Button x:Name="ResumeBtn"
+            Text="▶ Fortsetzen"
+            Clicked="OnResumeClicked"
+            WidthRequest="120"
+            BackgroundColor="#94e2d5"
+            TextColor="#181825"
+            FontAttributes="Bold"
+            CornerRadius="22"
+            IsVisible="{Binding Paused}"/>
+            <!-- Stop -->
             <Button x:Name="StopTrackBtn"
             Text="■ Stop"
             Clicked="OnStopTrackClicked"
@@ -112,7 +135,8 @@
             TextColor="#181825"
             FontAttributes="Bold"
             CornerRadius="22"
-            IsVisible="False"/>
+            IsVisible="{Binding Tracking}"/>
         </HorizontalStackLayout>
+
     </Grid>
 </ContentPage>
