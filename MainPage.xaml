@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mapsui="clr-namespace:Mapsui.UI.Maui;assembly=Mapsui.UI.Maui"
+             xmlns:joystick="clr-namespace:HerrJogging.Debugging"
+             xmlns:diag="clr-namespace:System.Diagnostics;assembly=System.Diagnostics.Debug"
+             x:Class="HerrJogging.MainPage"
+             BackgroundColor="#181825">
+
+    <Grid RowDefinitions="Auto,*,Auto,Auto">
+
+        <!-- 0: Überschrift -->
+        <Label Grid.Row="0"
+           Text="🏃 HerrJogging"
+           FontSize="34"
+           FontAttributes="Bold"
+           TextColor="#cdd6f4"
+           HorizontalOptions="Center"
+           VerticalOptions="Center"
+           Padding="0,16"
+           />
+
+        <!-- 1: Karte -->
+        <Frame Grid.Row="1" Padding="0" Margin="0" CornerRadius="24" HasShadow="True" BackgroundColor="#232634">
+            <mapsui:MapControl x:Name="MyMap"
+                       VerticalOptions="Fill"
+                       HorizontalOptions="Fill"/>
+        </Frame>
+
+        <!-- 1a: Overlay ... -->
+        <AbsoluteLayout Grid.Row="1"
+                        VerticalOptions="Fill"
+                        HorizontalOptions="Fill"
+                        InputTransparent="True">
+            <!-- Overlay-Elemente -->
+        </AbsoluteLayout>
+
+        <!-- 2: Unterer Bereich (Buttons) -->
+        <HorizontalStackLayout Grid.Row="2"
+                   Spacing="10"
+                   Padding="0,10"
+                   HorizontalOptions="Center">
+            <Button x:Name="TrackBtn"
+                Text="▶ Start Tracking"
+                Clicked="OnTrackClicked"
+                WidthRequest="110"
+                HeightRequest="44"
+                BackgroundColor="#94e2d5"
+                TextColor="#181825"
+                FontAttributes="Bold"
+                CornerRadius="22"/>
+            <Button x:Name="MapToggleBtn"
+                Text="🌎 Satellit"
+                BackgroundColor="#b4befe"
+                TextColor="#181825"
+                FontAttributes="Bold"
+                Clicked="OnMapToggleClicked"
+                WidthRequest="90"
+                HeightRequest="44"
+                CornerRadius="22"/>
+            <Button x:Name="LocateBtn"
+                Text="📍 Mein Standort"
+                Clicked="OnLocateClicked"
+                BackgroundColor="#f9e2af"
+                TextColor="#181825"
+                WidthRequest="90"
+                HeightRequest="44"
+                FontAttributes="Bold"
+                CornerRadius="22"/>
+        </HorizontalStackLayout>
+
+        <!-- 3: Dev-Tools (Joystick) -->
+        <HorizontalStackLayout Grid.Row="3"
+            Spacing="20"
+            Padding="0,6"
+            HorizontalOptions="End">
+            <joystick:VirtualJoystick x:Name="GpsJoystick"
+                          IsVisible="{x:Static diag:Debugger.IsAttached}"
+                          WidthRequest="80"
+                          HeightRequest="80" />
+        </HorizontalStackLayout>
+    </Grid>
+</ContentPage>
