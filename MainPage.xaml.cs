@@ -84,10 +84,18 @@ public partial class MainPage : ContentPage
         var map = MyMap.Map;
         if (map is null) return;
 
-        map.Layers.Clear();
-        map.Layers.Add(_satellite ? _layerManager.SatelliteLayer : _layerManager.RoadLayer);
+        // Entferne nur Basemap-Layer
+        if (map.Layers.Contains(_layerManager.RoadLayer))
+            map.Layers.Remove(_layerManager.RoadLayer);
+        if (map.Layers.Contains(_layerManager.SatelliteLayer))
+            map.Layers.Remove(_layerManager.SatelliteLayer);
+
+        // Füge neuen Basemap-Layer an erster Stelle ein
+        map.Layers.Insert(0, _satellite ? _layerManager.SatelliteLayer : _layerManager.RoadLayer);
+
         MyMap.RefreshGraphics();
     }
+
 
     private void OnTrackClicked(object sender, EventArgs e)
     {
