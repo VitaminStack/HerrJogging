@@ -4,31 +4,37 @@
              xmlns:mapsui="clr-namespace:Mapsui.UI.Maui;assembly=Mapsui.UI.Maui"
              x:Class="HerrJogging.MainPage"
              BackgroundColor="#181825">
-    <Grid RowDefinitions="Auto,*,Auto">
-        <!-- 0: Überschrift -->
-        <Label Grid.Row="0"
-           Text="🏃 HerrJogging"
-           FontSize="28"
-           FontAttributes="Bold"
-           TextColor="#cdd6f4"
-           HorizontalOptions="Center"
-           VerticalOptions="Center"
-           Padding="0,10"/>
-
-        <!-- 1: Karte -->
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <!-- 0: Menü-Buttons -->
+        <HorizontalStackLayout Grid.Row="0" HorizontalOptions="Center" Spacing="8" Margin="0,8,0,2">
+            <Button Text="⚡" Clicked="OnButton1Clicked" CornerRadius="20" BackgroundColor="#313244" TextColor="#cdd6f4" WidthRequest="60"/>
+            <Button Text="🏃 Läufe" Clicked="OnButton2Clicked" CornerRadius="20" BackgroundColor="#313244" TextColor="#cdd6f4" WidthRequest="80"/>
+            <Button Text="🗺 Karte" Clicked="OnKarteClicked" CornerRadius="20" BackgroundColor="#b4befeAA" TextColor="#181825" WidthRequest="80"/>
+            <Button Text="⭐" Clicked="OnButton4Clicked" CornerRadius="20" BackgroundColor="#313244" TextColor="#cdd6f4" WidthRequest="60"/>
+            <Button Text="⚙️" Clicked="OnButton5Clicked" CornerRadius="20" BackgroundColor="#313244" TextColor="#cdd6f4" WidthRequest="60"/>
+        </HorizontalStackLayout>
+        
+        <!-- 2: Karte -->
         <mapsui:MapControl x:Name="MyMap"
-                       Grid.Row="1"
+                       Grid.Row="2"
                        VerticalOptions="FillAndExpand"
                        HorizontalOptions="FillAndExpand"/>
+        <!-- Karten-Toggle rechts oben über der Karte -->
+        <Button x:Name="MapToggleBtn"
+            Text="🌎 Satellit"
+            Grid.Row="2"
+            BackgroundColor="#80b4befe"
+            TextColor="#181825"
+            FontAttributes="Bold"
+            WidthRequest="120"
+            CornerRadius="22"
+            Clicked="OnMapToggleClicked"
+            HorizontalOptions="End"
+            VerticalOptions="Start"
+            Margin="0,18,18,0" />
 
-        <!-- 1a: Overlay ... -->
-        <!-- Optional: Weitere Overlay-Elemente können hier eingefügt werden -->
-
-        <!-- 2: Unterer Bereich -->
-        <HorizontalStackLayout Grid.Row="2"
-                   Spacing="20"
-                   Padding="0,20"
-                   HorizontalOptions="Center">
+        <!-- 3: Unterer Bereich -->
+        <HorizontalStackLayout Grid.Row="3" HorizontalOptions="Center" Spacing="20" Padding="0,20">
             <Button x:Name="TrackBtn"
                 Text="▶ Start Tracking"
                 Clicked="OnTrackClicked"
@@ -37,14 +43,15 @@
                 TextColor="#181825"
                 FontAttributes="Bold"
                 CornerRadius="22"/>
-            <Button x:Name="MapToggleBtn"
-                Text="🌎 Satellit"
-                BackgroundColor="#b4befe"
+            <Button x:Name="StopTrackBtn"
+                Text="■ Stop"
+                Clicked="OnStopTrackClicked"
+                WidthRequest="80"
+                BackgroundColor="#f38ba8AA"
                 TextColor="#181825"
                 FontAttributes="Bold"
-                Clicked="OnMapToggleClicked"
-                WidthRequest="120"
-                CornerRadius="22"/>            
+                CornerRadius="22"
+                IsVisible="False"/>
         </HorizontalStackLayout>
     </Grid>
 </ContentPage>
