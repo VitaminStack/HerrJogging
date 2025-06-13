@@ -17,6 +17,9 @@ public partial class MainPage : ContentPage
     private readonly MapLayerManager _layerManager = new();
     private readonly TrackingManager _tracker = new();
     private bool _satellite = false;
+    private JoggingRun? _currentRun;
+    private List<JoggingRun> _runs = new(); // Hier werden alle abgeschlossenen Läufe gespeichert
+    private System.Diagnostics.Stopwatch _stopwatch = new();
 
     public MainPage()
     {
@@ -28,7 +31,7 @@ public partial class MainPage : ContentPage
         MyMap.Map = map;
 
         // 2. Karte auf aktuellen Standort zentrieren
-        _ = CenterMapOnStartAsync();
+        _ = CenterMapOnStartAsync(2000);
 
         // 3. UI-State initialisieren
         UpdateButtonStates();
@@ -48,28 +51,53 @@ public partial class MainPage : ContentPage
 
     private void OnTrackClicked(object sender, EventArgs e)
     {
+        _ = CenterMapOnStartAsync(1); // Karte zentrieren und zoomen
         _tracker.Start();
+        _stopwatch.Restart();
+        _currentRun = new JoggingRun { StartTime = DateTime.Now };
         UpdateButtonStates();
         _cts = new CancellationTokenSource();
         _ = TrackLoopAsync(_cts.Token);
     }
+
     private void OnPauseClicked(object sender, EventArgs e)
     {
         _tracker.Pause();
+        _stopwatch.Stop();
         UpdateButtonStates();
     }
+
     private void OnResumeClicked(object sender, EventArgs e)
     {
         _tracker.Resume();
+        _stopwatch.Start();
         UpdateButtonStates();
     }
-    private void OnStopTrackClicked(object sender, EventArgs e)
+
+    private async void OnStopTrackClicked(object sender, EventArgs e)
     {
         _tracker.Stop();
+        _stopwatch.Stop();
         UpdateButtonStates();
         _cts?.Cancel();
         _cts = null;
+
+        if (_currentRun != null)
+        {
+            _currentRun.EndTime = DateTime.Now;
+            // Optional: Kopiere die Route noch mal final aus dem Tracker
+            _currentRun.Route = _tracker.GetCurrentRoute(); // Methode muss im Tracker existieren!
+            _runs.Add(_currentRun);
+
+            // Zeige eine kurze Zusammenfassung als Bestätigung
+            await DisplayAlert("Lauf gespeichert",
+                $"Dauer: {_currentRun.Duration}\nDistanz: {Math.Round(_currentRun.TotalDistanceMeters / 1000, 2)} km",
+                "OK");
+        }
+
+        _currentRun = null;
     }
+
 
     private void UpdateButtonStates()
     {
@@ -80,26 +108,7 @@ public partial class MainPage : ContentPage
     }
 
     // ===== Map- und Tracking-Helper (ggf. weiter auslagerbar) =====
-
-    private async Task CenterMapOnStartAsync()
-    {
-        try
-        {
-            var location = await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Best));
-            if (location == null) return;
-
-            var pt = SphericalMercator.FromLonLat(location.Longitude, location.Latitude);
-            var position = new MPoint(pt.x, pt.y);
-
-            MyMap?.Map?.Navigator.CenterOnAndZoomTo(position, 1, 2000);
-            MyMap?.RefreshGraphics();
-        }
-        catch (Exception)
-        {
-            // Standort konnte nicht bestimmt werden, ignoriere Fehler
-        }
-    }
-
+        
     private CancellationTokenSource? _cts;
     private async Task TrackLoopAsync(CancellationToken token)
     {
@@ -123,6 +132,25 @@ public partial class MainPage : ContentPage
         }
     }
 
+    private async Task CenterMapOnStartAsync(long duration)
+    {
+        try
+        {
+            var location = await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Best));
+            if (location == null) return;
+
+            var pt = SphericalMercator.FromLonLat(location.Longitude, location.Latitude);
+            var position = new MPoint(pt.x, pt.y);
+
+            MyMap?.Map?.Navigator.CenterOnAndZoomTo(position, 1, duration);
+            MyMap?.RefreshGraphics();
+        }
+        catch (Exception)
+        {
+            // Standort konnte nicht bestimmt werden, ignoriere Fehler
+        }
+    }
+
     // ===== Menü-Button-Handler (kann später weiter ausgelagert werden) =====
 
     private void OnButton1Clicked(object sender, EventArgs e) { /* ... */ }
@@ -137,6 +165,7 @@ public class TrackingManager
 {
     private readonly List<MPoint> _trackPoints = new();
     private MemoryLayer? _trackLayer;
+    private readonly List<MPoint> _points = new();
 
     public bool IsTracking { get; private set; }
     public bool IsPaused { get; private set; }
@@ -156,6 +185,10 @@ public class TrackingManager
         _trackPoints.Clear();
     }
 
+    public List<MPoint> GetCurrentRoute()
+    {
+        return new List<MPoint>(_points); // Kopie, nicht die Referenz!
+    }
     public void AddPoint(MPoint pt)
     {
         if (IsTracking && !IsPaused)
@@ -164,25 +197,27 @@ public class TrackingManager
 
     public void UpdateTrackLayer(Mapsui.Map map)
     {
-        if (_trackPoints.Count < 2) return;
+        if (_points.Count < 2) return;
+
         if (_trackLayer is null)
         {
             _trackLayer = new MemoryLayer
             {
                 Name = "Jogging-Track",
-                IsMapInfoLayer = false,
                 Style = null
             };
             map.Layers.Add(_trackLayer);
         }
-        var ntsCoords = _trackPoints.Select(p => new Coordinate(p.X, p.Y)).ToArray();
-        var lineString = new LineString(ntsCoords);
-        var feature = new GeometryFeature { Geometry = lineString };
-        feature.Styles.Add(new VectorStyle
+
+        var ntsCoords = _points.Select(p => new NetTopologySuite.Geometries.Coordinate(p.X, p.Y)).ToArray();
+        var lineString = new NetTopologySuite.Geometries.LineString(ntsCoords);
+        var feature = new Mapsui.Nts.GeometryFeature { Geometry = lineString };
+        feature.Styles.Add(new Mapsui.Styles.VectorStyle
         {
-            Line = new Pen(Mapsui.Styles.Color.Red, 4) { PenStyle = PenStyle.Solid }
+            Line = new Mapsui.Styles.Pen(Mapsui.Styles.Color.Red, 4)
         });
-        _trackLayer.Features = new List<IFeature> { feature };
+
+        _trackLayer.Features = new List<Mapsui.IFeature> { feature };
         _trackLayer.DataHasChanged();
     }
 }
@@ -210,5 +245,26 @@ public class MapLayerManager
                 Url: "https://www.esri.com/en-us/legal/terms/full-master-agreement")
         );
         return new TileLayer(tileSource);
+    }
+}
+
+public class JoggingRun
+{
+    public DateTime StartTime { get; set; }
+    public DateTime? EndTime { get; set; }
+    public List<Mapsui.MPoint> Route { get; set; } = new();
+    public TimeSpan? Duration => EndTime.HasValue ? EndTime.Value - StartTime : null;
+    
+    public double TotalDistanceMeters => CalculateDistance();
+
+    private double CalculateDistance()
+    {
+        if (Route.Count < 2) return 0;
+        double sum = 0;
+        for (int i = 1; i < Route.Count; i++)
+        {
+            sum += Route[i - 1].Distance(Route[i]);
+        }
+        return sum;
     }
 }
