@@ -20,6 +20,8 @@ public partial class MainPage : ContentPage
     private JoggingRun? _currentRun;
     private List<JoggingRun> _runs = new(); // Hier werden alle abgeschlossenen Läufe gespeichert
     private System.Diagnostics.Stopwatch _stopwatch = new();
+    private MemoryLayer? _locationMarkerLayer;
+    private CancellationTokenSource? _locationCts;
 
     public MainPage()
     {
@@ -35,7 +37,45 @@ public partial class MainPage : ContentPage
 
         // 3. UI-State initialisieren
         UpdateButtonStates();
+        StartLocationLoop();
     }
+    private void StartLocationLoop()
+    {
+        _locationCts = new CancellationTokenSource();
+        _ = LocationLoopAsync(_locationCts.Token);
+    }
+    private async Task LocationLoopAsync(CancellationToken token)
+    {
+        var req = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromSeconds(1));
+        while (!token.IsCancellationRequested)
+        {
+            try
+            {
+                var loc = await Geolocation.GetLocationAsync(req, token);
+                System.Diagnostics.Debug.WriteLine($"[LocationLoop] {loc?.Latitude}, {loc?.Longitude}");
+
+                if (loc != null)
+                {
+                    var pt = SphericalMercator.FromLonLat(loc.Longitude, loc.Latitude);
+                    UpdateLocationMarker(new MPoint(pt.x, pt.y), MyMap.Map!);
+
+                    if (_tracker.IsTracking)
+                    {
+                        // Hier wirklich immer wieder UpdateTrackLayer!
+                        _tracker.UpdateTrackLayer(MyMap.Map!);
+                    }
+
+                    MyMap?.RefreshGraphics();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[LocationLoop] Exception: {ex}");
+            }
+            await Task.Delay(1000, token);
+        }
+    }
+
 
     private void OnMapToggleClicked(object sender, EventArgs e)
     {
@@ -59,21 +99,18 @@ public partial class MainPage : ContentPage
         _cts = new CancellationTokenSource();
         _ = TrackLoopAsync(_cts.Token);
     }
-
     private void OnPauseClicked(object sender, EventArgs e)
     {
         _tracker.Pause();
         _stopwatch.Stop();
         UpdateButtonStates();
     }
-
     private void OnResumeClicked(object sender, EventArgs e)
     {
         _tracker.Resume();
         _stopwatch.Start();
         UpdateButtonStates();
     }
-
     private async void OnStopTrackClicked(object sender, EventArgs e)
     {
         _tracker.Stop();
@@ -117,19 +154,49 @@ public partial class MainPage : ContentPage
         {
             try
             {
+
                 var loc = await Geolocation.GetLocationAsync(req, token);
-                if (loc is null) continue;
+                if (loc is null)
+                {
+                    await Task.Delay(1000, token);
+                    continue;
+                }
                 var pt = SphericalMercator.FromLonLat(loc.Longitude, loc.Latitude);
                 _tracker.AddPoint(new MPoint(pt.x, pt.y));
                 _tracker.UpdateTrackLayer(MyMap.Map!);
-                MyMap.Map.Navigator.CenterOn(new MPoint(pt.x, pt.y));
+                UpdateLocationMarker(new MPoint(pt.x, pt.y), MyMap.Map!);
+                _ = CenterMapOnStartAsync(1); // Karte zentrieren und zoomen
                 MyMap.RefreshGraphics();
             }
             catch (Exception)
             {
-                // Bei Abbruch oder fehlender Berechtigung einfach weiterlaufen lassen
+                await Task.Delay(1000, token); // Weiterlaufen, ggf. warten
             }
         }
+    }
+
+
+    private void UpdateLocationMarker(Mapsui.MPoint position, Mapsui.Map map)
+    {
+        if (_locationMarkerLayer == null)
+        {
+            _locationMarkerLayer = new MemoryLayer { Name = "LocationMarker" };
+            map.Layers.Add(_locationMarkerLayer);
+        }
+
+        var feature = new Mapsui.Nts.GeometryFeature
+        {
+            Geometry = new NetTopologySuite.Geometries.Point(position.X, position.Y)
+        };
+        feature.Styles.Add(new Mapsui.Styles.SymbolStyle
+        {
+            SymbolScale = 0.5f,
+            Fill = new Mapsui.Styles.Brush(Mapsui.Styles.Color.Blue),
+            Outline = new Mapsui.Styles.Pen(Mapsui.Styles.Color.Black, 2),
+        });
+
+        _locationMarkerLayer.Features = new List<Mapsui.IFeature> { feature };
+        _locationMarkerLayer.DataHasChanged();
     }
 
     private async Task CenterMapOnStartAsync(long duration)
@@ -165,7 +232,6 @@ public class TrackingManager
 {
     private readonly List<MPoint> _trackPoints = new();
     private MemoryLayer? _trackLayer;
-    private readonly List<MPoint> _points = new();
 
     public bool IsTracking { get; private set; }
     public bool IsPaused { get; private set; }
@@ -182,13 +248,16 @@ public class TrackingManager
     {
         IsTracking = false;
         IsPaused = false;
-        _trackPoints.Clear();
+        // Track behalten, falls du ihn noch anzeigen willst!
+        // _trackPoints.Clear(); // NICHT hier leeren!
     }
+
 
     public List<MPoint> GetCurrentRoute()
     {
-        return new List<MPoint>(_points); // Kopie, nicht die Referenz!
+        return new List<MPoint>(_trackPoints); // <== richtig!
     }
+
     public void AddPoint(MPoint pt)
     {
         if (IsTracking && !IsPaused)
@@ -197,7 +266,7 @@ public class TrackingManager
 
     public void UpdateTrackLayer(Mapsui.Map map)
     {
-        if (_points.Count < 2) return;
+        if (_trackPoints.Count < 2) return; // Korrigiert!
 
         if (_trackLayer is null)
         {
@@ -209,18 +278,19 @@ public class TrackingManager
             map.Layers.Add(_trackLayer);
         }
 
-        var ntsCoords = _points.Select(p => new NetTopologySuite.Geometries.Coordinate(p.X, p.Y)).ToArray();
+        var ntsCoords = _trackPoints.Select(p => new NetTopologySuite.Geometries.Coordinate(p.X, p.Y)).ToArray();
         var lineString = new NetTopologySuite.Geometries.LineString(ntsCoords);
         var feature = new Mapsui.Nts.GeometryFeature { Geometry = lineString };
         feature.Styles.Add(new Mapsui.Styles.VectorStyle
         {
-            Line = new Mapsui.Styles.Pen(Mapsui.Styles.Color.Red, 4)
+            Line = new Mapsui.Styles.Pen(Mapsui.Styles.Color.Red, 3)
         });
 
         _trackLayer.Features = new List<Mapsui.IFeature> { feature };
         _trackLayer.DataHasChanged();
     }
 }
+
 
 public class MapLayerManager
 {
