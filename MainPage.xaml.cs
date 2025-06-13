@@ -221,7 +221,7 @@ public partial class MainPage : ContentPage
     // ===== Menü-Button-Handler (kann später weiter ausgelagert werden) =====
 
     private void OnButton1Clicked(object sender, EventArgs e) { /* ... */ }
-    private void OnButton2Clicked(object sender, EventArgs e) { /* ... */ }
+    private void OnLäufeClicked(object sender, EventArgs e) { /* ... */ }
     private void OnKarteClicked(object sender, EventArgs e) { /* ... */ }
     private void OnButton4Clicked(object sender, EventArgs e) { /* ... */ }
     private void OnButton5Clicked(object sender, EventArgs e) { /* ... */ }

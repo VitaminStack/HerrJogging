@@ -7,9 +7,9 @@
 
         <!-- Menüleiste -->
         <HorizontalStackLayout Grid.Row="0"
-                       Spacing="10"
-                       Padding="0,12,0,8"
-                       HorizontalOptions="Center">
+                      Spacing="10"
+                      Padding="0,12,0,8"
+                      HorizontalOptions="Center">
             <!-- Quick -->
             <Frame WidthRequest="72" HeightRequest="72"
            BorderColor="Transparent"
@@ -17,6 +17,9 @@
            Padding="0"
            CornerRadius="18"
            HasShadow="False">
+                <Frame.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnButton1Clicked"/>
+                </Frame.GestureRecognizers>
                 <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
                     <Label Text="⚡" FontSize="24" HorizontalOptions="Center"/>
                     <Label Text="Quick" FontSize="11" TextColor="#cdd6f4" HorizontalOptions="Center"/>
@@ -29,48 +32,59 @@
            Padding="0"
            CornerRadius="18"
            HasShadow="False">
+                <Frame.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnLäufeClicked"/>
+                </Frame.GestureRecognizers>
                 <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
                     <Label Text="🏃" FontSize="24" HorizontalOptions="Center"/>
                     <Label Text="Läufe" FontSize="11" TextColor="#cdd6f4" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </Frame>
-            <!-- Karte (Aktiv) -->
             <Frame WidthRequest="72" HeightRequest="72"
-           BorderColor="#a6e3a1"
-           BackgroundColor="#b4befe"
-           Padding="0"
-           CornerRadius="18"
-           HasShadow="False">
+            BorderColor="Transparent"
+            BackgroundColor="#313244"
+            Padding="0"
+            CornerRadius="18"
+            HasShadow="False">
+                <Frame.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnKarteClicked"/>
+                </Frame.GestureRecognizers>
                 <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
                     <Label Text="🗺" FontSize="24" HorizontalOptions="Center"/>
-                    <Label Text="Karte" FontSize="11" TextColor="#181825" HorizontalOptions="Center"/>
+                    <Label Text="Karte" FontSize="11" TextColor="#cdd6f4" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </Frame>
-            <!-- Favoriten -->
             <Frame WidthRequest="72" HeightRequest="72"
-           BorderColor="Transparent"
-           BackgroundColor="#313244"
-           Padding="0"
-           CornerRadius="18"
-           HasShadow="False">
+            BorderColor="Transparent"
+            BackgroundColor="#313244"
+            Padding="0"
+            CornerRadius="18"
+            HasShadow="False">
+                <Frame.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnButton4Clicked"/>
+                </Frame.GestureRecognizers>
                 <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
                     <Label Text="⭐" FontSize="24" HorizontalOptions="Center"/>
                     <Label Text="Favoriten" FontSize="11" TextColor="#cdd6f4" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </Frame>
-            <!-- Einstellungen -->
             <Frame WidthRequest="72" HeightRequest="72"
-           BorderColor="Transparent"
-           BackgroundColor="#313244"
-           Padding="0"
-           CornerRadius="18"
-           HasShadow="False">
+            BorderColor="Transparent"
+            BackgroundColor="#313244"
+            Padding="0"
+            CornerRadius="18"
+            HasShadow="False">
+                <Frame.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnButton5Clicked"/>
+                </Frame.GestureRecognizers>
                 <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
                     <Label Text="⚙️" FontSize="24" HorizontalOptions="Center"/>
                     <Label Text="Einstellungen" FontSize="11" TextColor="#cdd6f4" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </Frame>
+
         </HorizontalStackLayout>
+
 
 
         <!-- Kartenbereich als Grid, damit Overlays möglich sind -->
