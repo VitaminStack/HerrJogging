@@ -38,6 +38,9 @@ public partial class MainPage : ContentPage
 
         // ❸ Der MapControl-Instanz zuweisen
         MyMap.Map = map;
+
+        // Starte automatische Zentrierung/Zoom auf aktuellen Standort
+        _ = CenterMapOnStartAsync();
     }
 
     public class CustomUrlBuilder : IUrlBuilder
@@ -130,7 +133,7 @@ public partial class MainPage : ContentPage
     // ======== Kontinuierliches Tracking ========================================
     private async Task TrackLoopAsync(CancellationToken token)
     {
-        var req = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromSeconds(3));
+        var req = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromSeconds(1));
 
         while (!token.IsCancellationRequested)
         {
@@ -188,26 +191,24 @@ public partial class MainPage : ContentPage
         _trackLayer.Features = new List<IFeature> { feature }; // Korrekte Eigenschaft verwenden
         _trackLayer.DataHasChanged(); // Layer neu berechnen
     }
-    private async void OnLocateClicked(object sender, EventArgs e)
+
+    private async Task CenterMapOnStartAsync()
     {
         try
         {
-            // Hole aktuelle Position (MAUI Essentials)
             var location = await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Best));
             if (location == null) return;
 
-            // Umrechnen in Mapsui-Koordinaten (Web Mercator)
             var pt = SphericalMercator.FromLonLat(location.Longitude, location.Latitude);
+            var position = new MPoint(pt.x, pt.y);
 
-            // Karte darauf zentrieren
-            MyMap?.Map?.Navigator.CenterOn(new MPoint(pt.x, pt.y));
+            // Neuer: Auf "Zoomlevel" statt "Maßstab" gehen
+            MyMap?.Map?.Navigator.CenterOnAndZoomTo(position, 1, 2000); // Zoomlevel 16 = nah dran
             MyMap?.RefreshGraphics();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            // Optional: Fehler anzeigen oder loggen
-            await DisplayAlert("Fehler", "Standort konnte nicht ermittelt werden.", "OK");
+            // Standort konnte nicht bestimmt werden, ignoriere Fehler
         }
     }
-
 }
