@@ -14,193 +14,73 @@ namespace HerrJogging;
 
 public partial class MainPage : ContentPage
 {
-    private bool _satellite;
-    private ILayer _roadLayer;
-    private ILayer _satLayer;
-    private CancellationTokenSource? _cts;
-    private readonly List<MPoint> _trackPoints = new();
-    private MemoryLayer? _trackLayer;
-    private bool _tracking = false;
-    private bool _paused = false;
+    private readonly MapLayerManager _layerManager = new();
+    private readonly TrackingManager _tracker = new();
+    private bool _satellite = false;
 
     public MainPage()
     {
         InitializeComponent();
 
-        // ❶ Neue Mapsui-Map instanzieren
+        // 1. Map initialisieren und Standard-Layer setzen
         var map = new Mapsui.Map();
-
-        // ❷ Layer initialisieren
-        _roadLayer = OpenStreetMap.CreateTileLayer();
-        _satLayer = CreateSatelliteLayer(); // Hier Ihre spezifische Satellitenebene erstellen
-
-        // Straßen-Layer als Standard hinzufügen
-        map.Layers.Add(_roadLayer);
-
-        // ❸ Der MapControl-Instanz zuweisen
+        map.Layers.Add(_layerManager.RoadLayer);
         MyMap.Map = map;
 
-        // Starte automatische Zentrierung/Zoom auf aktuellen Standort
+        // 2. Karte auf aktuellen Standort zentrieren
         _ = CenterMapOnStartAsync();
+
+        // 3. UI-State initialisieren
         UpdateButtonStates();
-    }
-
-    public class CustomUrlBuilder : IUrlBuilder
-    {
-        private readonly string _urlTemplate;
-
-        public CustomUrlBuilder(string urlTemplate)
-        {
-            _urlTemplate = urlTemplate;
-        }
-
-        public Uri GetUrl(TileInfo tileInfo)
-        {
-            var url = _urlTemplate
-                .Replace("{z}", tileInfo.Index.Level.ToString())
-                .Replace("{x}", tileInfo.Index.Col.ToString())
-                .Replace("{y}", tileInfo.Index.Row.ToString());
-            return new Uri(url);
-        }
-    }
-
-    private ILayer CreateSatelliteLayer()
-    {
-        const string url =
-        "https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
-
-        var tileSource = new HttpTileSource(
-            tileSchema: new GlobalSphericalMercator(),
-            urlBuilder: new BasicUrlBuilder(url), // CustomUrlBuilder verwenden
-            name: "Esri World Imagery",
-            attribution: new BruTile.Attribution(
-                Text: "© Esri, Maxar, Earthstar Geographics",
-                Url: "https://www.esri.com/en-us/legal/terms/full-master-agreement")
-        );
-
-        return new TileLayer(tileSource);
     }
 
     private void OnMapToggleClicked(object sender, EventArgs e)
     {
         _satellite = !_satellite;
         MapToggleBtn.Text = _satellite ? "🗺 Karte" : "🌎 Satellit";
+        var map = MyMap.Map;
+        if (map is null) return;
 
-        if (MyMap.Map is null) return;
-
-        if (_satellite)
-        {
-            // Umschalten auf Satellit
-            if (MyMap.Map.Layers.Contains(_roadLayer))
-                MyMap.Map.Layers.Remove(_roadLayer);
-
-            if (!MyMap.Map.Layers.Contains(_satLayer))
-                MyMap.Map.Layers.Insert(0, _satLayer);
-        }
-        else
-        {
-            // Umschalten auf Karte
-            if (MyMap.Map.Layers.Contains(_satLayer))
-                MyMap.Map.Layers.Remove(_satLayer);
-
-            if (!MyMap.Map.Layers.Contains(_roadLayer))
-                MyMap.Map.Layers.Insert(0, _roadLayer);
-        }
-
-
+        map.Layers.Clear();
+        map.Layers.Add(_satellite ? _layerManager.SatelliteLayer : _layerManager.RoadLayer);
         MyMap.RefreshGraphics();
     }
+
     private void OnTrackClicked(object sender, EventArgs e)
     {
-        _tracking = true;
-        _paused = false;
+        _tracker.Start();
         UpdateButtonStates();
-        // Tracking-Start-Logik...
+        _cts = new CancellationTokenSource();
+        _ = TrackLoopAsync(_cts.Token);
     }
     private void OnPauseClicked(object sender, EventArgs e)
     {
-        _paused = true;
+        _tracker.Pause();
         UpdateButtonStates();
-        // Tracking pausieren...
     }
     private void OnResumeClicked(object sender, EventArgs e)
     {
-        _paused = false;
+        _tracker.Resume();
         UpdateButtonStates();
-        // Tracking fortsetzen...
     }
     private void OnStopTrackClicked(object sender, EventArgs e)
     {
-        _tracking = false;
-        _paused = false;
+        _tracker.Stop();
         UpdateButtonStates();
-        // Tracking stoppen...
+        _cts?.Cancel();
+        _cts = null;
     }
+
     private void UpdateButtonStates()
     {
-        TrackBtn.IsVisible = !_tracking;
-        PauseBtn.IsVisible = _tracking && !_paused;
-        ResumeBtn.IsVisible = _tracking && _paused;
-        StopTrackBtn.IsVisible = _tracking;
+        TrackBtn.IsVisible = !_tracker.IsTracking;
+        PauseBtn.IsVisible = _tracker.IsTracking && !_tracker.IsPaused;
+        ResumeBtn.IsVisible = _tracker.IsTracking && _tracker.IsPaused;
+        StopTrackBtn.IsVisible = _tracker.IsTracking;
     }
 
-    private async Task TrackLoopAsync(CancellationToken token)
-    {
-        var req = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromSeconds(1));
+    // ===== Map- und Tracking-Helper (ggf. weiter auslagerbar) =====
 
-        while (!token.IsCancellationRequested)
-        {
-            try
-            {
-                var loc = await Geolocation.GetLocationAsync(req, token);
-                if (loc is null) continue;
-
-                // Koordinate ins Web-Mercator-System von Mapsui projizieren
-                var pt = new MPoint(
-                    SphericalMercator.FromLonLat(loc.Longitude, loc.Latitude).x,
-                    SphericalMercator.FromLonLat(loc.Longitude, loc.Latitude).y
-                );
-                _trackPoints.Add(pt);
-
-                UpdateTrackLayer();          // Linie neu zeichnen
-                MyMap.Map.Navigator.CenterOn(pt); // Karte mittig setzen
-                MyMap.RefreshGraphics();
-            }
-            catch (Exception)
-            {
-                // Bei Abbruch oder fehlender Berechtigung einfach weiterlaufen lassen
-            }
-        }
-    }
-    private void UpdateTrackLayer()
-    {
-        if (_trackPoints.Count < 2) return; // Linie erst ab 2 Punkten
-
-        // Erster Aufruf? Layer anlegen
-        if (_trackLayer is null)
-        {
-            _trackLayer = new MemoryLayer
-            {
-                Name = "Jogging-Track",
-                IsMapInfoLayer = false,
-                Style = null // Wir stylen jede Feature selbst
-            };
-            MyMap.Map!.Layers.Add(_trackLayer);
-        }
-
-        var ntsCoords = _trackPoints.Select(p => new Coordinate(p.X, p.Y)).ToArray();
-
-        var lineString = new LineString(ntsCoords);
-        var feature = new GeometryFeature { Geometry = lineString };
-        feature.Styles.Add(new VectorStyle
-        {
-            Line = new Pen(Mapsui.Styles.Color.Red, 4) { PenStyle = PenStyle.Solid }
-        });
-
-        // Dem Layer den neuen Inhalt geben
-        _trackLayer.Features = new List<IFeature> { feature }; // Korrekte Eigenschaft verwenden
-        _trackLayer.DataHasChanged(); // Layer neu berechnen
-    }
     private async Task CenterMapOnStartAsync()
     {
         try
@@ -211,8 +91,7 @@ public partial class MainPage : ContentPage
             var pt = SphericalMercator.FromLonLat(location.Longitude, location.Latitude);
             var position = new MPoint(pt.x, pt.y);
 
-            // Neuer: Auf "Zoomlevel" statt "Maßstab" gehen
-            MyMap?.Map?.Navigator.CenterOnAndZoomTo(position, 1, 2000); // Zoomlevel 16 = nah dran
+            MyMap?.Map?.Navigator.CenterOnAndZoomTo(position, 1, 2000);
             MyMap?.RefreshGraphics();
         }
         catch (Exception)
@@ -221,29 +100,115 @@ public partial class MainPage : ContentPage
         }
     }
 
-
-
-
-    //MENU BUTTONS LOGIC
-    private void OnButton1Clicked(object sender, EventArgs e)
+    private CancellationTokenSource? _cts;
+    private async Task TrackLoopAsync(CancellationToken token)
     {
-        // Logik für den Button "⚡" hier einfügen
-    }
-    private void OnButton2Clicked(object sender, EventArgs e)
-    {
-        // Logik für den Button "⚡" hier einfügen
-    }
-    private void OnKarteClicked(object sender, EventArgs e)
-    {
-        // Logik für den Button "⚡" hier einfügen
-    }
-    private void OnButton4Clicked(object sender, EventArgs e)
-    {
-        // Logik für den Button "⚡" hier einfügen
-    }
-    private void OnButton5Clicked(object sender, EventArgs e)
-    {
-        // Logik für den Button "⚡" hier einfügen
+        var req = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromSeconds(1));
+        while (!token.IsCancellationRequested)
+        {
+            try
+            {
+                var loc = await Geolocation.GetLocationAsync(req, token);
+                if (loc is null) continue;
+                var pt = SphericalMercator.FromLonLat(loc.Longitude, loc.Latitude);
+                _tracker.AddPoint(new MPoint(pt.x, pt.y));
+                _tracker.UpdateTrackLayer(MyMap.Map!);
+                MyMap.Map.Navigator.CenterOn(new MPoint(pt.x, pt.y));
+                MyMap.RefreshGraphics();
+            }
+            catch (Exception)
+            {
+                // Bei Abbruch oder fehlender Berechtigung einfach weiterlaufen lassen
+            }
+        }
     }
 
+    // ===== Menü-Button-Handler (kann später weiter ausgelagert werden) =====
+
+    private void OnButton1Clicked(object sender, EventArgs e) { /* ... */ }
+    private void OnButton2Clicked(object sender, EventArgs e) { /* ... */ }
+    private void OnKarteClicked(object sender, EventArgs e) { /* ... */ }
+    private void OnButton4Clicked(object sender, EventArgs e) { /* ... */ }
+    private void OnButton5Clicked(object sender, EventArgs e) { /* ... */ }
+}
+
+
+public class TrackingManager
+{
+    private readonly List<MPoint> _trackPoints = new();
+    private MemoryLayer? _trackLayer;
+
+    public bool IsTracking { get; private set; }
+    public bool IsPaused { get; private set; }
+
+    public void Start()
+    {
+        IsTracking = true;
+        IsPaused = false;
+        _trackPoints.Clear();
+    }
+    public void Pause() => IsPaused = true;
+    public void Resume() => IsPaused = false;
+    public void Stop()
+    {
+        IsTracking = false;
+        IsPaused = false;
+        _trackPoints.Clear();
+    }
+
+    public void AddPoint(MPoint pt)
+    {
+        if (IsTracking && !IsPaused)
+            _trackPoints.Add(pt);
+    }
+
+    public void UpdateTrackLayer(Mapsui.Map map)
+    {
+        if (_trackPoints.Count < 2) return;
+        if (_trackLayer is null)
+        {
+            _trackLayer = new MemoryLayer
+            {
+                Name = "Jogging-Track",
+                IsMapInfoLayer = false,
+                Style = null
+            };
+            map.Layers.Add(_trackLayer);
+        }
+        var ntsCoords = _trackPoints.Select(p => new Coordinate(p.X, p.Y)).ToArray();
+        var lineString = new LineString(ntsCoords);
+        var feature = new GeometryFeature { Geometry = lineString };
+        feature.Styles.Add(new VectorStyle
+        {
+            Line = new Pen(Mapsui.Styles.Color.Red, 4) { PenStyle = PenStyle.Solid }
+        });
+        _trackLayer.Features = new List<IFeature> { feature };
+        _trackLayer.DataHasChanged();
+    }
+}
+
+public class MapLayerManager
+{
+    public ILayer RoadLayer { get; }
+    public ILayer SatelliteLayer { get; }
+
+    public MapLayerManager()
+    {
+        RoadLayer = OpenStreetMap.CreateTileLayer();
+        SatelliteLayer = CreateSatelliteLayer();
+    }
+
+    private ILayer CreateSatelliteLayer()
+    {
+        const string url = "https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+        var tileSource = new HttpTileSource(
+            tileSchema: new GlobalSphericalMercator(),
+            urlBuilder: new BasicUrlBuilder(url),
+            name: "Esri World Imagery",
+            attribution: new BruTile.Attribution(
+                Text: "© Esri, Maxar, Earthstar Geographics",
+                Url: "https://www.esri.com/en-us/legal/terms/full-master-agreement")
+        );
+        return new TileLayer(tileSource);
+    }
 }
