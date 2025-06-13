@@ -128,9 +128,14 @@ public partial class MainPage : ContentPage
         _cts?.Cancel();
         _cts = null;
     }
-    // ===========================================================================
+    private void OnStopTrackClicked(object sender, EventArgs e)
+    {
+        _tracking = false;
+        TrackBtn.IsEnabled = true;
+        StopTrackBtn.IsVisible = false;
+        // ... Tracking stoppen
+    }
 
-    // ======== Kontinuierliches Tracking ========================================
     private async Task TrackLoopAsync(CancellationToken token)
     {
         var req = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromSeconds(1));
@@ -159,9 +164,6 @@ public partial class MainPage : ContentPage
             }
         }
     }
-    // ===========================================================================
-
-    // ======== Track-Layer erstellen / aktualisieren =============================
     private void UpdateTrackLayer()
     {
         if (_trackPoints.Count < 2) return; // Linie erst ab 2 Punkten
@@ -191,7 +193,6 @@ public partial class MainPage : ContentPage
         _trackLayer.Features = new List<IFeature> { feature }; // Korrekte Eigenschaft verwenden
         _trackLayer.DataHasChanged(); // Layer neu berechnen
     }
-
     private async Task CenterMapOnStartAsync()
     {
         try
@@ -211,4 +212,30 @@ public partial class MainPage : ContentPage
             // Standort konnte nicht bestimmt werden, ignoriere Fehler
         }
     }
+
+
+
+
+    //MENU BUTTONS LOGIC
+    private void OnButton1Clicked(object sender, EventArgs e)
+    {
+        // Logik für den Button "⚡" hier einfügen
+    }
+    private void OnButton2Clicked(object sender, EventArgs e)
+    {
+        // Logik für den Button "⚡" hier einfügen
+    }
+    private void OnKarteClicked(object sender, EventArgs e)
+    {
+        // Logik für den Button "⚡" hier einfügen
+    }
+    private void OnButton4Clicked(object sender, EventArgs e)
+    {
+        // Logik für den Button "⚡" hier einfügen
+    }
+    private void OnButton5Clicked(object sender, EventArgs e)
+    {
+        // Logik für den Button "⚡" hier einfügen
+    }
+
 }
