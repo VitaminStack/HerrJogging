@@ -1,57 +1,118 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:mapsui="clr-namespace:Mapsui.UI.Maui;assembly=Mapsui.UI.Maui"
              x:Class="HerrJogging.MainPage"
              BackgroundColor="#181825">
-    <Grid RowDefinitions="Auto,Auto,*,Auto">
-        <!-- 0: Menü-Buttons -->
-        <HorizontalStackLayout Grid.Row="0" HorizontalOptions="Center" Spacing="8" Margin="0,8,0,2">
-            <Button Text="⚡" Clicked="OnButton1Clicked" CornerRadius="20" BackgroundColor="#313244" TextColor="#cdd6f4" WidthRequest="60"/>
-            <Button Text="🏃 Läufe" Clicked="OnButton2Clicked" CornerRadius="20" BackgroundColor="#313244" TextColor="#cdd6f4" WidthRequest="80"/>
-            <Button Text="🗺 Karte" Clicked="OnKarteClicked" CornerRadius="20" BackgroundColor="#b4befeAA" TextColor="#181825" WidthRequest="80"/>
-            <Button Text="⭐" Clicked="OnButton4Clicked" CornerRadius="20" BackgroundColor="#313244" TextColor="#cdd6f4" WidthRequest="60"/>
-            <Button Text="⚙️" Clicked="OnButton5Clicked" CornerRadius="20" BackgroundColor="#313244" TextColor="#cdd6f4" WidthRequest="60"/>
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Menüleiste -->
+        <HorizontalStackLayout Grid.Row="0"
+                       Spacing="10"
+                       Padding="0,12,0,8"
+                       HorizontalOptions="Center">
+            <!-- Quick -->
+            <Frame WidthRequest="72" HeightRequest="72"
+           BorderColor="Transparent"
+           BackgroundColor="#313244"
+           Padding="0"
+           CornerRadius="18"
+           HasShadow="False">
+                <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
+                    <Label Text="⚡" FontSize="24" HorizontalOptions="Center"/>
+                    <Label Text="Quick" FontSize="11" TextColor="#cdd6f4" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Frame>
+            <!-- Läufe -->
+            <Frame WidthRequest="72" HeightRequest="72"
+           BorderColor="Transparent"
+           BackgroundColor="#313244"
+           Padding="0"
+           CornerRadius="18"
+           HasShadow="False">
+                <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
+                    <Label Text="🏃" FontSize="24" HorizontalOptions="Center"/>
+                    <Label Text="Läufe" FontSize="11" TextColor="#cdd6f4" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Frame>
+            <!-- Karte (Aktiv) -->
+            <Frame WidthRequest="72" HeightRequest="72"
+           BorderColor="#a6e3a1"
+           BackgroundColor="#b4befe"
+           Padding="0"
+           CornerRadius="18"
+           HasShadow="False">
+                <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
+                    <Label Text="🗺" FontSize="24" HorizontalOptions="Center"/>
+                    <Label Text="Karte" FontSize="11" TextColor="#181825" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Frame>
+            <!-- Favoriten -->
+            <Frame WidthRequest="72" HeightRequest="72"
+           BorderColor="Transparent"
+           BackgroundColor="#313244"
+           Padding="0"
+           CornerRadius="18"
+           HasShadow="False">
+                <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
+                    <Label Text="⭐" FontSize="24" HorizontalOptions="Center"/>
+                    <Label Text="Favoriten" FontSize="11" TextColor="#cdd6f4" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Frame>
+            <!-- Einstellungen -->
+            <Frame WidthRequest="72" HeightRequest="72"
+           BorderColor="Transparent"
+           BackgroundColor="#313244"
+           Padding="0"
+           CornerRadius="18"
+           HasShadow="False">
+                <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
+                    <Label Text="⚙️" FontSize="24" HorizontalOptions="Center"/>
+                    <Label Text="Einstellungen" FontSize="11" TextColor="#cdd6f4" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Frame>
         </HorizontalStackLayout>
-        
-        <!-- 2: Karte -->
-        <mapsui:MapControl x:Name="MyMap"
-                       Grid.Row="2"
-                       VerticalOptions="FillAndExpand"
-                       HorizontalOptions="FillAndExpand"/>
-        <!-- Karten-Toggle rechts oben über der Karte -->
-        <Button x:Name="MapToggleBtn"
-            Text="🌎 Satellit"
-            Grid.Row="2"
-            BackgroundColor="#80b4befe"
+
+
+        <!-- Kartenbereich als Grid, damit Overlays möglich sind -->
+        <Grid Grid.Row="1" Margin="12,0,12,0">
+            <!-- Deko: Card-Look -->
+            <BoxView BackgroundColor="#232332" CornerRadius="22" />
+            <!-- Karte -->
+            <mapsui:MapControl x:Name="MyMap"
+                               VerticalOptions="FillAndExpand"
+                               HorizontalOptions="FillAndExpand"/>
+            <!-- Floating Button oben rechts über der Karte -->
+            <Button x:Name="MapToggleBtn"
+                Text="🌎 Satellit"
+                BackgroundColor="#80b4befe"
+                TextColor="#181825"
+                FontAttributes="Bold"
+                WidthRequest="120"
+                CornerRadius="22"
+                Clicked="OnMapToggleClicked"
+                HorizontalOptions="End"
+                VerticalOptions="Start"
+                Margin="0,18,18,0"/>
+        </Grid>
+        <!-- Unterer Bereich -->
+        <HorizontalStackLayout Grid.Row="2" HorizontalOptions="Center" Spacing="20" Padding="0,20">
+            <Button x:Name="TrackBtn"
+            Text="▶ Start Tracking"
+            Clicked="OnTrackClicked"
+            WidthRequest="150"
+            BackgroundColor="#94e2d5"
             TextColor="#181825"
             FontAttributes="Bold"
-            WidthRequest="120"
-            CornerRadius="22"
-            Clicked="OnMapToggleClicked"
-            HorizontalOptions="End"
-            VerticalOptions="Start"
-            Margin="0,18,18,0" />
-
-        <!-- 3: Unterer Bereich -->
-        <HorizontalStackLayout Grid.Row="3" HorizontalOptions="Center" Spacing="20" Padding="0,20">
-            <Button x:Name="TrackBtn"
-                Text="▶ Start Tracking"
-                Clicked="OnTrackClicked"
-                WidthRequest="150"
-                BackgroundColor="#94e2d5"
-                TextColor="#181825"
-                FontAttributes="Bold"
-                CornerRadius="22"/>
+            CornerRadius="22"/>
             <Button x:Name="StopTrackBtn"
-                Text="■ Stop"
-                Clicked="OnStopTrackClicked"
-                WidthRequest="80"
-                BackgroundColor="#f38ba8AA"
-                TextColor="#181825"
-                FontAttributes="Bold"
-                CornerRadius="22"
-                IsVisible="False"/>
+            Text="■ Stop"
+            Clicked="OnStopTrackClicked"
+            WidthRequest="80"
+            BackgroundColor="#f38ba8AA"
+            TextColor="#181825"
+            FontAttributes="Bold"
+            CornerRadius="22"
+            IsVisible="False"/>
         </HorizontalStackLayout>
     </Grid>
 </ContentPage>
