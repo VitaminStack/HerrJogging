@@ -2,86 +2,146 @@
 <ContentView
     x:Class="HerrJogging.BottomNavBar"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="Transparent">
 
-    <HorizontalStackLayout Padding="0,12,0,8"
-                          HorizontalOptions="Center"
-                          VerticalOptions="End"
-                          Spacing="10">
-        <!-- Page1 -->
-        <Frame WidthRequest="72" HeightRequest="72"
-               BorderColor="Transparent"
-               BackgroundColor="#313244"
-               Padding="0"
-               CornerRadius="18"
-               HasShadow="False">
-            <Frame.GestureRecognizers>
-                <TapGestureRecognizer Tapped="OnPage1Clicked"/>
-            </Frame.GestureRecognizers>
-            <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
-                <Label Text="⚡" FontSize="24" HorizontalOptions="Center"/>
-                <Label Text="Page1" FontSize="11" TextColor="#cdd6f4" HorizontalOptions="Center"/>
-            </VerticalStackLayout>
-        </Frame>
-        <!-- LäufePage -->
-        <Frame WidthRequest="72" HeightRequest="72"
-               BorderColor="Transparent"
-               BackgroundColor="#313244"
-               Padding="0"
-               CornerRadius="18"
-               HasShadow="False">
-            <Frame.GestureRecognizers>
-                <TapGestureRecognizer Tapped="OnLäufeClicked"/>
-            </Frame.GestureRecognizers>
-            <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
-                <Label Text="🏃" FontSize="24" HorizontalOptions="Center"/>
-                <Label Text="Läufe" FontSize="11" TextColor="#cdd6f4" HorizontalOptions="Center"/>
-            </VerticalStackLayout>
-        </Frame>
-        <!-- KartePage -->
-        <Frame WidthRequest="72" HeightRequest="72"
-               BorderColor="#a6e3a1"
-               BackgroundColor="#b4befe"
-               Padding="0"
-               CornerRadius="18"
-               HasShadow="False">
-            <Frame.GestureRecognizers>
-                <TapGestureRecognizer Tapped="OnKarteClicked"/>
-            </Frame.GestureRecognizers>
-            <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
-                <Label Text="🗺" FontSize="24" HorizontalOptions="Center"/>
-                <Label Text="Karte" FontSize="11" TextColor="#181825" HorizontalOptions="Center"/>
-            </VerticalStackLayout>
-        </Frame>
-        <!-- Page4 -->
-        <Frame WidthRequest="72" HeightRequest="72"
-               BorderColor="Transparent"
-               BackgroundColor="#313244"
-               Padding="0"
-               CornerRadius="18"
-               HasShadow="False">
-            <Frame.GestureRecognizers>
-                <TapGestureRecognizer Tapped="OnPage4Clicked"/>
-            </Frame.GestureRecognizers>
-            <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
-                <Label Text="⭐" FontSize="24" HorizontalOptions="Center"/>
-                <Label Text="Page4" FontSize="11" TextColor="#cdd6f4" HorizontalOptions="Center"/>
-            </VerticalStackLayout>
-        </Frame>
-        <!-- Page5 -->
-        <Frame WidthRequest="72" HeightRequest="72"
-               BorderColor="Transparent"
-               BackgroundColor="#313244"
-               Padding="0"
-               CornerRadius="18"
-               HasShadow="False">
-            <Frame.GestureRecognizers>
-                <TapGestureRecognizer Tapped="OnPage5Clicked"/>
-            </Frame.GestureRecognizers>
-            <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
-                <Label Text="⚙️" FontSize="24" HorizontalOptions="Center"/>
-                <Label Text="Page5" FontSize="11" TextColor="#cdd6f4" HorizontalOptions="Center"/>
-            </VerticalStackLayout>
-        </Frame>
-    </HorizontalStackLayout>
+    <Grid Padding="0,0,0,8">
+        <BoxView BackgroundColor="#22211e" HeightRequest="100" VerticalOptions="End" HorizontalOptions="FillAndExpand" CornerRadius="0"/>
+        <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="10" Padding="0,0,0,4">
+            <!-- Tab 1: (demnächst) -->
+            <Grid WidthRequest="70" HorizontalOptions="Center">
+                <Frame x:Name="Tab1Bubble"
+                       Padding="0"
+                       HeightRequest="48"
+                       WidthRequest="66"
+                       BackgroundColor="Transparent"
+                       CornerRadius="20"
+                       HasShadow="False"
+                       IsClippedToBounds="True"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center">
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnTab1Clicked"/>
+                    </Frame.GestureRecognizers>
+                    <Image Source="icon_home.png" HeightRequest="30" WidthRequest="30" HorizontalOptions="Center" Opacity="1"/>
+                </Frame>
+                <Label x:Name="Tab1Label"
+                       Text="..."
+                       FontSize="15"
+                       TextColor="White"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       VerticalOptions="End"
+                       Margin="0,70,0,0"/>
+            </Grid>
+
+            <!-- Tab 2: Läufe -->
+            <Grid WidthRequest="70" HorizontalOptions="Center">
+                <Frame x:Name="LäufeBubble"
+                       Padding="0"
+                       HeightRequest="48"
+                       WidthRequest="66"
+                       BackgroundColor="#161514"
+                       CornerRadius="20"
+                       HasShadow="False"
+                       IsClippedToBounds="True"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center">
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnLäufeClicked"/>
+                    </Frame.GestureRecognizers>
+                    <Image Source="lauf.png" HeightRequest="30" WidthRequest="30" HorizontalOptions="Center" Opacity="1"/>
+                </Frame>
+                <Label x:Name="LäufeLabel"
+                       Text="Läufe"
+                       FontSize="15"
+                       TextColor="White"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       VerticalOptions="End"
+                       Margin="0,44,0,0"/>
+            </Grid>
+
+            <!-- Tab 3: Karte (aktiver Tab, Bubble) -->
+            <Grid WidthRequest="70" HorizontalOptions="Center">
+                <Frame x:Name="KarteBubble"
+                       Padding="0"
+                       HeightRequest="48"
+                       WidthRequest="66"
+                       BackgroundColor="#111"
+                       CornerRadius="15"
+                       HasShadow="False"
+                       IsClippedToBounds="True"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center">
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnKarteClicked"/>
+                    </Frame.GestureRecognizers>
+                    <Image Source="karte.png" HeightRequest="30" WidthRequest="30" HorizontalOptions="Center" Opacity="1"/>
+                </Frame>
+                <Label x:Name="KarteLabel"
+                       Text="Karten"
+                       FontSize="15"
+                       TextColor="White"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       VerticalOptions="End"
+                       Margin="0,44,0,0"/>
+            </Grid>
+
+            <!-- Tab 4: (demnächst) -->
+            <Grid WidthRequest="70" HorizontalOptions="Center">
+                <Frame x:Name="Tab4Bubble"
+                       Padding="0"
+                       HeightRequest="48"
+                       WidthRequest="66"
+                       BackgroundColor="Transparent"
+                       CornerRadius="20"
+                       HasShadow="False"
+                       IsClippedToBounds="True"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center">
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnTab4Clicked"/>
+                    </Frame.GestureRecognizers>
+                    <Image Source="icon_history.png" HeightRequest="30" WidthRequest="30" HorizontalOptions="Center" Opacity="1"/>
+                </Frame>
+                <Label x:Name="Tab4Label"
+                       Text="..."
+                       FontSize="15"
+                       TextColor="White"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       VerticalOptions="End"
+                       Margin="0,44,0,0"/>
+            </Grid>
+
+            <!-- Tab 5: (demnächst) -->
+            <Grid WidthRequest="70" HorizontalOptions="Center">
+                <Frame x:Name="Tab5Bubble"
+                       Padding="0"
+                       HeightRequest="50"
+                       WidthRequest="66"
+                       BackgroundColor="Transparent"
+                       CornerRadius="15"
+                       HasShadow="False"
+                       IsClippedToBounds="True"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center">
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnTab5Clicked"/>
+                    </Frame.GestureRecognizers>
+                    <Image Source="icon_profile.png" HeightRequest="30" WidthRequest="30" HorizontalOptions="Center" Opacity="1"/>
+                </Frame>
+                <Label x:Name="Tab5Label"
+                       Text="..."
+                       FontSize="15"
+                       TextColor="White"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       VerticalOptions="End"
+                       Margin="0,44,0,0"/>
+            </Grid>
+        </HorizontalStackLayout>
+    </Grid>
 </ContentView>
