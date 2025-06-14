@@ -10,9 +10,9 @@ using Mapsui.Tiling;
 using Mapsui.Tiling.Layers;
 using NetTopologySuite.Geometries;
 
-namespace HerrJogging;
+namespace HerrJogging.Pages;
 
-public partial class MainPage : ContentPage
+public partial class KartePage : ContentPage
 {
     private readonly MapLayerManager _layerManager = new();
     private readonly TrackingManager _tracker = new();
@@ -23,7 +23,7 @@ public partial class MainPage : ContentPage
     private MemoryLayer? _locationMarkerLayer;
     private CancellationTokenSource? _locationCts;
 
-    public MainPage()
+    public KartePage()
     {
         InitializeComponent();
 
@@ -225,14 +225,6 @@ public partial class MainPage : ContentPage
             // Standort konnte nicht bestimmt werden, ignoriere Fehler
         }
     }
-
-    // ===== Menü-Button-Handler (kann später weiter ausgelagert werden) =====
-
-    private void OnButton1Clicked(object sender, EventArgs e) { /* ... */ }
-    private void OnLäufeClicked(object sender, EventArgs e) { /* ... */ }
-    private void OnKarteClicked(object sender, EventArgs e) { /* ... */ }
-    private void OnButton4Clicked(object sender, EventArgs e) { /* ... */ }
-    private void OnButton5Clicked(object sender, EventArgs e) { /* ... */ }
 }
 
 

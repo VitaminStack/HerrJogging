@@ -3,13 +3,14 @@
     x:Class="HerrJogging.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:HerrJogging"
+    xmlns:pages="clr-namespace:HerrJogging.Pages"
     Shell.FlyoutBehavior="Disabled"
     Title="HerrJogging">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <ShellContent Title="Karte" ContentTemplate="{DataTemplate pages:KartePage}" Route="karte" />
+    <ShellContent Title="Page1" ContentTemplate="{DataTemplate pages:Page1}" Route="Page1" />
+    <ShellContent Title="Läufe" ContentTemplate="{DataTemplate pages:LäufePage}" Route="läufe" />    
+    <ShellContent Title="Page4" ContentTemplate="{DataTemplate pages:Page4}" Route="Page4" />
+    <ShellContent Title="Page5" ContentTemplate="{DataTemplate pages:Page5}" Route="Page5" />
 
 </Shell>

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="HerrJogging.Pages.Page5"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:HerrJogging"
+    Title="Page5"
+    Shell.NavBarIsVisible="False">
+
+    <VerticalStackLayout>
+        <local:BottomNavBar />
+    </VerticalStackLayout>
+</ContentPage>
