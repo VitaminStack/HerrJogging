@@ -99,7 +99,7 @@ public partial class KartePage : ContentPage
 
     private void OnTrackClicked(object sender, EventArgs e)
     {
-        _ = CenterMapOnStartAsync(1); // Karte zentrieren und zoomen
+        _ = CenterMapOnStartAsync(1000); // Karte zentrieren und zoomen
         _tracker.Start();
         _stopwatch.Restart();
         _currentRun = new JoggingRun { StartTime = DateTime.Now };
@@ -173,7 +173,7 @@ public partial class KartePage : ContentPage
                 _tracker.AddPoint(new MPoint(pt.x, pt.y));
                 _tracker.UpdateTrackLayer(MyMap.Map!);
                 UpdateLocationMarker(new MPoint(pt.x, pt.y), MyMap.Map!);
-                _ = CenterMapOnStartAsync(1); // Karte zentrieren und zoomen
+                _ = CenterMapOnStartAsync(1000); // Karte zentrieren und zoomen
                 MyMap.RefreshGraphics();
             }
             catch (Exception)
