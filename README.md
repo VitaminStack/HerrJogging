@@ -14,7 +14,7 @@
 
 ## Screenshots
 
-![Beispielbild](https://github.com/VitaminStack/HerrJogging/Screen.png)
+![Beispielbild](https://github.com/VitaminStack/HerrJogging/blob/master/Screen.png)
 
 ## Installation & Build
 
