@@ -14,7 +14,7 @@
 
 ## Screenshots
 
-> *Hier kannst du noch eigene Screenshots einfügen!*
+![Beispielbild](https://github.com/VitaminStack/HerrJogging/Screen.png)
 
 ## Installation & Build
 
@@ -97,4 +97,3 @@ Dieses Projekt befindet sich in aktiver Entwicklung. Ideen, Pull Requests oder B
 Viel Spaß beim Laufen und Entwickeln! 👟
 
 
-![Beispielbild](https://github.com/VitaminStack/HerrJogging/Screen.png)
