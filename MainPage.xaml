@@ -3,20 +3,25 @@
              xmlns:mapsui="clr-namespace:Mapsui.UI.Maui;assembly=Mapsui.UI.Maui"
              x:Class="HerrJogging.MainPage"
              BackgroundColor="#181825">
-    <Grid RowDefinitions="Auto,*,Auto">
 
-        <!-- Menüleiste -->
-        <HorizontalStackLayout Grid.Row="0"
-                      Spacing="10"
-                      Padding="0,12,0,8"
-                      HorizontalOptions="Center">
+    <Grid>
+        <mapsui:MapControl x:Name="MyMap"
+        VerticalOptions="FillAndExpand"
+        HorizontalOptions="FillAndExpand"/>
+        <!-- 2. Menüleiste oben -->
+        <HorizontalStackLayout
+        Padding="0,12,0,8"
+        HorizontalOptions="Center"
+        VerticalOptions="Start"
+        Margin="0,18,0,0"
+        Spacing="10">
             <!-- Quick -->
             <Frame WidthRequest="72" HeightRequest="72"
-           BorderColor="Transparent"
-           BackgroundColor="#313244"
-           Padding="0"
-           CornerRadius="18"
-           HasShadow="False">
+               BorderColor="Transparent"
+               BackgroundColor="#313244"
+               Padding="0"
+               CornerRadius="18"
+               HasShadow="False">
                 <Frame.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnButton1Clicked"/>
                 </Frame.GestureRecognizers>
@@ -27,11 +32,11 @@
             </Frame>
             <!-- Läufe -->
             <Frame WidthRequest="72" HeightRequest="72"
-           BorderColor="Transparent"
-           BackgroundColor="#313244"
-           Padding="0"
-           CornerRadius="18"
-           HasShadow="False">
+               BorderColor="Transparent"
+               BackgroundColor="#313244"
+               Padding="0"
+               CornerRadius="18"
+               HasShadow="False">
                 <Frame.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnLäufeClicked"/>
                 </Frame.GestureRecognizers>
@@ -40,26 +45,28 @@
                     <Label Text="Läufe" FontSize="11" TextColor="#cdd6f4" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </Frame>
+            <!-- Karte -->
             <Frame WidthRequest="72" HeightRequest="72"
-            BorderColor="Transparent"
-            BackgroundColor="#313244"
-            Padding="0"
-            CornerRadius="18"
-            HasShadow="False">
+               BorderColor="#a6e3a1"
+               BackgroundColor="#b4befe"
+               Padding="0"
+               CornerRadius="18"
+               HasShadow="False">
                 <Frame.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnKarteClicked"/>
                 </Frame.GestureRecognizers>
                 <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
                     <Label Text="🗺" FontSize="24" HorizontalOptions="Center"/>
-                    <Label Text="Karte" FontSize="11" TextColor="#cdd6f4" HorizontalOptions="Center"/>
+                    <Label Text="Karte" FontSize="11" TextColor="#181825" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </Frame>
+            <!-- Favoriten -->
             <Frame WidthRequest="72" HeightRequest="72"
-            BorderColor="Transparent"
-            BackgroundColor="#313244"
-            Padding="0"
-            CornerRadius="18"
-            HasShadow="False">
+               BorderColor="Transparent"
+               BackgroundColor="#313244"
+               Padding="0"
+               CornerRadius="18"
+               HasShadow="False">
                 <Frame.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnButton4Clicked"/>
                 </Frame.GestureRecognizers>
@@ -68,12 +75,13 @@
                     <Label Text="Favoriten" FontSize="11" TextColor="#cdd6f4" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </Frame>
+            <!-- Einstellungen -->
             <Frame WidthRequest="72" HeightRequest="72"
-            BorderColor="Transparent"
-            BackgroundColor="#313244"
-            Padding="0"
-            CornerRadius="18"
-            HasShadow="False">
+               BorderColor="Transparent"
+               BackgroundColor="#313244"
+               Padding="0"
+               CornerRadius="18"
+               HasShadow="False">
                 <Frame.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnButton5Clicked"/>
                 </Frame.GestureRecognizers>
@@ -82,35 +90,30 @@
                     <Label Text="Einstellungen" FontSize="11" TextColor="#cdd6f4" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </Frame>
-
         </HorizontalStackLayout>
 
+        <!-- 3. Floating Button oben rechts -->
+        <Button x:Name="MapToggleBtn"
+            Text="🌎"
+            BackgroundColor="#80b4befe"
+            TextColor="#181825"
+            FontAttributes="Bold"
+            WidthRequest="45"
+            CornerRadius="50"
+            BorderColor="#181825"
+            BorderWidth="1"
+            Scale="1.5"
+            Clicked="OnMapToggleClicked"
+            HorizontalOptions="End"
+            VerticalOptions="Start"
+            Margin="0,350,40,0" />
 
-
-        <!-- Kartenbereich als Grid, damit Overlays möglich sind -->
-        <Grid Grid.Row="1" Margin="12,0,12,0">
-            <!-- Deko: Card-Look -->
-            <BoxView BackgroundColor="#232332" CornerRadius="22" />
-            <!-- Karte -->
-            <mapsui:MapControl x:Name="MyMap"
-                               VerticalOptions="FillAndExpand"
-                               HorizontalOptions="FillAndExpand"/>
-            <!-- Floating Button oben rechts über der Karte -->
-            <Button x:Name="MapToggleBtn"
-                Text="🌎 Satellit"
-                BackgroundColor="#80b4befe"
-                TextColor="#181825"
-                FontAttributes="Bold"
-                WidthRequest="120"
-                CornerRadius="22"
-                Clicked="OnMapToggleClicked"
-                HorizontalOptions="End"
-                VerticalOptions="Start"
-                Margin="0,18,18,0"/>
-        </Grid>
-        <!-- Unterer Bereich -->
-        <HorizontalStackLayout Grid.Row="2" HorizontalOptions="Center" Spacing="20" Padding="0,20">
-            <!-- Start -->
+        <!-- 4. Untere Buttonleiste -->
+        <HorizontalStackLayout
+        HorizontalOptions="Center"
+        VerticalOptions="End"
+        Spacing="20"
+        Padding="0,0,0,36">
             <Button x:Name="TrackBtn"
             Text="▶ Start Tracking"
             Clicked="OnTrackClicked"
@@ -119,8 +122,7 @@
             TextColor="#181825"
             FontAttributes="Bold"
             CornerRadius="22"
-            IsVisible="{Binding NotTracking}"/>
-            <!-- Pause -->
+            IsVisible="True"/>
             <Button x:Name="PauseBtn"
             Text="⏸ Pause"
             Clicked="OnPauseClicked"
@@ -129,8 +131,7 @@
             TextColor="#181825"
             FontAttributes="Bold"
             CornerRadius="22"
-            IsVisible="{Binding TrackingAndNotPaused}"/>
-            <!-- Fortsetzen -->
+            IsVisible="False"/>
             <Button x:Name="ResumeBtn"
             Text="▶ Fortsetzen"
             Clicked="OnResumeClicked"
@@ -139,8 +140,7 @@
             TextColor="#181825"
             FontAttributes="Bold"
             CornerRadius="22"
-            IsVisible="{Binding Paused}"/>
-            <!-- Stop -->
+            IsVisible="False"/>
             <Button x:Name="StopTrackBtn"
             Text="■ Stop"
             Clicked="OnStopTrackClicked"
@@ -149,8 +149,7 @@
             TextColor="#181825"
             FontAttributes="Bold"
             CornerRadius="22"
-            IsVisible="{Binding Tracking}"/>
+            IsVisible="False"/>
         </HorizontalStackLayout>
-
     </Grid>
 </ContentPage>
