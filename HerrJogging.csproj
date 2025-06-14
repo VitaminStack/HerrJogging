@@ -22,7 +22,7 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>HerrJogging</ApplicationTitle>
+		<ApplicationTitle>DIE Jogging App</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.companyname.herrjogging</ApplicationId>
