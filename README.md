@@ -97,4 +97,4 @@ Dieses Projekt befindet sich in aktiver Entwicklung. Ideen, Pull Requests oder B
 Viel Spaß beim Laufen und Entwickeln! 👟
 
 
-![Beispielbild](https://github.com/VitaminStack/HerrJogging/Screen.PNG)
+![Beispielbild](https://github.com/VitaminStack/HerrJogging/Screen.png)
