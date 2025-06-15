@@ -9,6 +9,7 @@ using Mapsui.Styles;
 using Mapsui.Tiling;
 using Mapsui.Tiling.Layers;
 using NetTopologySuite.Geometries;
+using static HerrJogging.Pages.JoggingRun;
 
 namespace HerrJogging.Pages;
 
@@ -22,20 +23,18 @@ public partial class KartePage : ContentPage
     private System.Diagnostics.Stopwatch _stopwatch = new();
     private MemoryLayer? _locationMarkerLayer;
     private CancellationTokenSource? _locationCts;
+    
 
     public KartePage()
     {
         InitializeComponent();
-
-        // 1. Map initialisieren und Standard-Layer setzen
+        _runs = RunStorage.LoadRuns();
         var map = new Mapsui.Map();
         map.Layers.Add(_layerManager.RoadLayer);
         MyMap.Map = map;
 
-        // 2. Karte auf aktuellen Standort zentrieren
         _ = CenterMapOnStartAsync(2000);
 
-        // 3. UI-State initialisieren
         UpdateButtonStates();
         StartLocationLoop();
     }
@@ -121,6 +120,7 @@ public partial class KartePage : ContentPage
     }
     private async void OnStopTrackClicked(object sender, EventArgs e)
     {
+        
         _tracker.Stop();
         _stopwatch.Stop();
         UpdateButtonStates();
@@ -131,10 +131,11 @@ public partial class KartePage : ContentPage
         {
             _currentRun.EndTime = DateTime.Now;
             // Optional: Kopiere die Route noch mal final aus dem Tracker
-            _currentRun.Route = _tracker.GetCurrentRoute(); // Methode muss im Tracker existieren!
-            _runs.Add(_currentRun);
+            _currentRun.Route = _tracker.GetCurrentRoute().Select(pt => new PointDto { X = pt.X, Y = pt.Y }).ToList();
 
-            // Zeige eine kurze Zusammenfassung als Bestätigung
+            _runs.Add(_currentRun);
+            RunStorage.SaveRuns(_runs);
+
             await DisplayAlert("Lauf gespeichert",
                 $"Dauer: {_currentRun.Duration}\nDistanz: {Math.Round(_currentRun.TotalDistanceMeters / 1000, 2)} km",
                 "OK");
@@ -320,11 +321,16 @@ public class MapLayerManager
 
 public class JoggingRun
 {
+    public class PointDto
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+    }
+
     public DateTime StartTime { get; set; }
     public DateTime? EndTime { get; set; }
-    public List<Mapsui.MPoint> Route { get; set; } = new();
+    public List<PointDto> Route { get; set; } = new();
     public TimeSpan? Duration => EndTime.HasValue ? EndTime.Value - StartTime : null;
-    
     public double TotalDistanceMeters => CalculateDistance();
 
     private double CalculateDistance()
@@ -333,8 +339,15 @@ public class JoggingRun
         double sum = 0;
         for (int i = 1; i < Route.Count; i++)
         {
-            sum += Route[i - 1].Distance(Route[i]);
+            sum += Distance(Route[i - 1], Route[i]);
         }
         return sum;
+    }
+
+    private double Distance(PointDto a, PointDto b)
+    {
+        double dx = a.X - b.X;
+        double dy = a.Y - b.Y;
+        return Math.Sqrt(dx * dx + dy * dy);
     }
 }

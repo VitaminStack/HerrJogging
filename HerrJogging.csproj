@@ -82,6 +82,9 @@
 	  <MauiXaml Update="Debugging\VirtualJoystick.xaml">
 	    <Generator></Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="MiniMapView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Pages\Page1.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

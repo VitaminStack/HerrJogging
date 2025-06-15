@@ -1,13 +1,83 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
+﻿<ContentPage
     x:Class="HerrJogging.Pages.LäufePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:HerrJogging"
+    xmlns:controls="clr-namespace:HerrJogging.Controls"
     Title="Läufe"
     Shell.NavBarIsVisible="False">
 
-    <VerticalStackLayout>
-        <local:BottomNavBar />
-    </VerticalStackLayout>
+    <Grid>
+        <!-- BottomNavBar immer am oberen Rand -->
+        <local:BottomNavBar VerticalOptions="Start" />
+
+        <!-- Leerer Status: Wird angezeigt, wenn keine Läufe vorhanden sind -->
+        <StackLayout x:Name="EmptyState"
+                     VerticalOptions="Center"
+                     HorizontalOptions="Center"
+                     IsVisible="False"
+                     Spacing="18">
+            <Image Source="lauf.png" HeightRequest="64" WidthRequest="64" Opacity="0.75"/>
+            <Label Text="Noch keine Läufe gespeichert"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   TextColor="#bfc0d7"
+                   HorizontalOptions="Center"/>
+            <Label Text="Starte jetzt deinen ersten Lauf und tracke deine Fortschritte!"
+                   FontSize="14"
+                   TextColor="#bfc0d7"
+                   HorizontalOptions="Center"/>
+        </StackLayout>
+
+        <!-- Läufe-Liste -->
+        <CollectionView x:Name="RunsList"
+                        ItemsSource="{Binding JoggingRuns}"
+                        Margin="0,120,0,90">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="16,10,16,6"
+                           Padding="0"
+                           BackgroundColor="Transparent"
+                           CornerRadius="18"
+                           HasShadow="True"
+                           HeightRequest="220">
+                        <Grid>
+                            <!-- Hintergrund-Karte: nimmt 100% ein -->
+                            <controls:MiniMapView
+                                Route="{Binding Route}" />
+
+                            <!-- Overlay am unteren Rand -->
+                            <Grid
+                                BackgroundColor="#23211ECC"
+                                Padding="16,12"
+                                VerticalOptions="End"
+                                HorizontalOptions="FillAndExpand"
+                                Margin="0"
+                                HeightRequest="60"
+                                RowDefinitions="*,Auto">
+                                <!-- RowDefinitions sorgt dafür, dass das Overlay ganz unten liegt -->
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <!-- Platzhalter, damit Overlay ganz unten ist -->
+                                <BoxView Grid.Row="0" Color="Transparent"/>
+
+                                <!-- STATS -->
+                                <StackLayout Grid.Row="1" Orientation="Vertical" Spacing="2">
+                                    <Label Text="{Binding StartTime, StringFormat='Gestartet: {0:dd.MM.yyyy HH:mm}'}"
+                                           FontSize="13" TextColor="White"/>
+                                    <Label Text="{Binding Duration, StringFormat='Dauer: {0:hh\\:mm\\:ss}'}"
+                                           FontSize="13" TextColor="#d0d0d0"/>
+                                    <Label Text="{Binding TotalDistanceMeters, StringFormat='Distanz: {0:F2} m'}"
+                                           FontSize="13" TextColor="#d0d0d0"/>
+                                </StackLayout>
+                            </Grid>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
 </ContentPage>
