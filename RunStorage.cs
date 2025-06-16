@@ -5,19 +5,21 @@ namespace HerrJogging;
 
 public static class RunStorage
 {
-    private const string RunsKey = "jogging_runs";
+    private static string StoragePath =>
+        Path.Combine(FileSystem.AppDataDirectory, "jogging_runs.json");
 
     public static void SaveRuns(List<Pages.JoggingRun> runs)
     {
         var json = JsonSerializer.Serialize(runs);
-        Preferences.Set(RunsKey, json);
+        File.WriteAllText(StoragePath, json);
     }
 
     public static List<Pages.JoggingRun> LoadRuns()
     {
-        var json = Preferences.Get(RunsKey, "");
-        if (string.IsNullOrEmpty(json)) return new List<Pages.JoggingRun>();
+        if (!File.Exists(StoragePath))
+            return new List<Pages.JoggingRun>();
+
+        var json = File.ReadAllText(StoragePath);
         return JsonSerializer.Deserialize<List<Pages.JoggingRun>>(json) ?? new List<Pages.JoggingRun>();
     }
-
 }
