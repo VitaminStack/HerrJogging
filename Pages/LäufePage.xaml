@@ -47,32 +47,57 @@
                                 Route="{Binding Route}" />
 
                             <!-- Overlay am unteren Rand -->
-                            <Grid
-                                BackgroundColor="#23211ECC"
-                                Padding="16,12"
-                                VerticalOptions="End"
-                                HorizontalOptions="FillAndExpand"
-                                Margin="0"
-                                HeightRequest="60"
-                                RowDefinitions="*,Auto">
-                                <!-- RowDefinitions sorgt dafür, dass das Overlay ganz unten liegt -->
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
+                            <Frame BackgroundColor="#B3000000"
+                                Padding="8"
+                                CornerRadius="0"
+                                HasShadow="False"
+                                AbsoluteLayout.LayoutBounds="0,1,1,0.28"
+                                AbsoluteLayout.LayoutFlags="All">
+                                <Grid RowDefinitions="Auto,Auto,Auto">
+                                    <Label Text="{Binding StartTime,
+                          StringFormat='Gestartet: {0:dd.MM.yyyy HH:mm}'}"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                TextColor="White" />
 
-                                <!-- Platzhalter, damit Overlay ganz unten ist -->
-                                <BoxView Grid.Row="0" Color="Transparent"/>
+                                    <Label Text="{Binding Duration,
+                          StringFormat='Dauer: {0:hh\\:mm\\:ss}'}"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                TextColor="White"
+                                Grid.Row="1"/>
 
-                                <!-- STATS -->
-                                <StackLayout Grid.Row="1" Orientation="Vertical" Spacing="2">
-                                    <Label Text="{Binding StartTime, StringFormat='Gestartet: {0:dd.MM.yyyy HH:mm}'}"
-                                           FontSize="13" TextColor="White"/>
-                                    <Label Text="{Binding Duration, StringFormat='Dauer: {0:hh\\:mm\\:ss}'}"
-                                           FontSize="13" TextColor="#d0d0d0"/>
-                                    <Label Text="{Binding TotalDistanceMeters, StringFormat='Distanz: {0:F2} m'}"
-                                           FontSize="13" TextColor="#d0d0d0"/>
-                                </StackLayout>
+                                    <Label Text="{Binding TotalDistanceMeters,
+                          StringFormat='Distanz: {0:F0} m'}"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                TextColor="White"
+                                Grid.Row="2"/>
+                                </Grid>
+                            </Frame>
+
+                            <!-- Kleiner Löschbutton oben rechts -->
+                            <Grid HorizontalOptions="End" VerticalOptions="Start" Margin="0,8,8,0" HeightRequest="32" WidthRequest="32" ZIndex="2">
+                                <Frame BackgroundColor="#FF4545"
+                                    Padding="0"
+                                    HeightRequest="32"
+                                    WidthRequest="32"
+                                    CornerRadius="16"
+                                    HasShadow="True"
+                                    BorderColor="#fff"
+                                    HorizontalOptions="End"
+                                    VerticalOptions="Start">
+                                    <Frame.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding BindingContext.DeleteRunCommand, Source={x:Reference Name=RunsList}}"
+                                      CommandParameter="{Binding .}"/>
+                                    </Frame.GestureRecognizers>
+                                    <Label Text="✕"
+                                        FontSize="18"
+                                        FontAttributes="Bold"
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Center"
+                                        TextColor="White"/>
+                                </Frame>
                             </Grid>
                         </Grid>
                     </Frame>

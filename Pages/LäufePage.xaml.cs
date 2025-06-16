@@ -1,5 +1,6 @@
-﻿using System.Collections.ObjectModel;
-using HerrJogging; // Hinzugefügt, um auf den Namespace HerrJogging zuzugreifen
+﻿using HerrJogging; // Hinzugefügt, um auf den Namespace HerrJogging zuzugreifen
+using System.Collections.ObjectModel;
+using System.Windows.Input;
 
 
 namespace HerrJogging.Pages;
@@ -7,6 +8,7 @@ namespace HerrJogging.Pages;
 public partial class LäufePage : ContentPage
 {
     public ObservableCollection<JoggingRun> JoggingRuns { get; set; }
+    public ICommand DeleteRunCommand { get; }
 
     public LäufePage()
     {
@@ -17,6 +19,8 @@ public partial class LäufePage : ContentPage
         BindingContext = this;
 
         RunsList.ItemsSource = JoggingRuns;
+
+        DeleteRunCommand = new Command<JoggingRun>(async run => await DeleteRunAsync(run));
 
         // Leerer Status, falls keine Läufe vorhanden sind
         JoggingRuns.CollectionChanged += (s, e) => UpdateEmptyState();
@@ -43,5 +47,23 @@ public partial class LäufePage : ContentPage
             EmptyState.IsVisible = JoggingRuns.Count == 0;
             RunsList.IsVisible = JoggingRuns.Count > 0;
         });
+    }
+    private async Task DeleteRunAsync(JoggingRun run)
+    {
+        if (run == null) return;
+
+        bool confirm = await DisplayAlert(
+            "Lauf löschen?",
+            "Möchtest du diesen Lauf wirklich löschen?",
+            "Ja", "Abbrechen");
+
+        if (!confirm) return;
+
+        // Lauf aus Liste entfernen
+        JoggingRuns.Remove(run);
+
+        // Läufe speichern
+        RunStorage.SaveRuns(JoggingRuns.ToList());
+        UpdateEmptyState();
     }
 }
