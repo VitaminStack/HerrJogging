@@ -33,6 +33,10 @@ public partial class MiniMapView : ContentView
 
     private void RenderRoute()
     {
+
+        const double MinSpanDeg = 0.01;  // ≈ 1 km
+        const double PaddingFrac = 0.15;  // 15 % Rand
+
         if (Route == null || Route.Count < 2)
         {
             // Dummy-Viewport (z. B. zentriert auf Deutschland)
@@ -64,12 +68,16 @@ public partial class MiniMapView : ContentView
         };
         map.Layers.Add(routeLayer);
 
-        var envelope = line.EnvelopeInternal;
-        double minSpan = 0.001; // Mindestausdehnung, damit nicht zu stark reingezoomt wird
-        if (envelope.Width < minSpan) envelope.ExpandBy(minSpan, 0);
-        if (envelope.Height < minSpan) envelope.ExpandBy(0, minSpan);
+        var env = line.EnvelopeInternal;
 
-        var mrect = new Mapsui.MRect(envelope.MinX, envelope.MinY, envelope.MaxX, envelope.MaxY);
+        // Mindest­größe
+        if (env.Width < MinSpanDeg) env.ExpandBy((MinSpanDeg - env.Width) / 2, 0);
+        if (env.Height < MinSpanDeg) env.ExpandBy(0, (MinSpanDeg - env.Height) / 2);
+
+        // zusätzlicher Rand
+        env.ExpandBy(env.Width * PaddingFrac, env.Height * PaddingFrac);
+
+        var mrect = new Mapsui.MRect(env.MinX, env.MinY, env.MaxX, env.MaxY);
         MiniMap.Map.Navigator.ZoomToBox(mrect, Mapsui.MBoxFit.Fit);
 
         MiniMap.RefreshGraphics();
